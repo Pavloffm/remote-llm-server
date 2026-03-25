@@ -1,31 +1,22 @@
-version: "3.8"
-
 services:
-  vllm:
-    image: vllm/vllm-openai:latest
-    container_name: remote-llm-server
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    restart: unless-stopped
     ports:
-      - "0.0.0.0:8000:8000"
-    environment:
-      - HUGGING_FACE_HUB_TOKEN=${HF_TOKEN}
-      - VLLM_API_KEY=${LLM_API_KEY}
+      - "11434:11434"
     volumes:
-      - hf_cache:/root/.cache/huggingface
-    command: >
-      --model ${MODEL_NAME}
-      --host 0.0.0.0
-      --port 8000
-      --api-key ${LLM_API_KEY}
-      --dtype auto
-      --max-model-len 4096
+      - ollama:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+      - OLLAMA_KEEP_ALIVE=24h
     deploy:
       resources:
         reservations:
           devices:
             - driver: nvidia
-              count: 1
+              count: all
               capabilities: [gpu]
-    restart: unless-stopped
 
 volumes:
-  hf_cache:
+  ollama:
